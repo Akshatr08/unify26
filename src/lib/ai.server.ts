@@ -1,34 +1,24 @@
 // Server-only helper for building the Lovable AI Gateway provider.
 // The gateway routes to Gemini + other models behind a single LOVABLE_API_KEY.
 
-import { createOpenAICompatible } from "@ai-sdk/openai-compatible";
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 
-export const DEFAULT_MODEL_ID = "google/gemini-3-flash-preview";
+export const DEFAULT_MODEL_ID = "gemini-2.5-flash";
 
-function getLovableApiKey(): string {
-  const key = process.env.LOVABLE_API_KEY;
+function getGeminiApiKey(): string {
+  const key = process.env.GEMINI_API_KEY;
   if (!key) {
-    throw new Error(
-      "Missing LOVABLE_API_KEY. Lovable Cloud must be enabled to use the AI Gateway.",
-    );
+    throw new Error("Missing GEMINI_API_KEY environment variable.");
   }
   return key;
 }
 
-export function getLovableGateway() {
-  return createOpenAICompatible({
-    name: "lovable",
-    baseURL: "https://ai.gateway.lovable.dev/v1",
-    headers: {
-      "Lovable-API-Key": getLovableApiKey(),
-      "X-Lovable-AIG-SDK": "vercel-ai-sdk",
-    },
-  });
-}
+const google = createGoogleGenerativeAI({
+  apiKey: getGeminiApiKey(),
+});
 
-// Back-compat: existing callers use getGeminiModel(); route it through the gateway.
 export function getGeminiModel(modelId: string = DEFAULT_MODEL_ID) {
-  return getLovableGateway()(modelId);
+  return google(modelId);
 }
 
 export const ROLE_SYSTEM_PROMPTS = {
