@@ -48,7 +48,7 @@ function NotFoundComponent() {
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
   useEffect(() => {
-    console.error("[UNIFY/26 error boundary]", error);
+    // Error boundary triggered
   }, [error]);
 
   return (
@@ -135,6 +135,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
         {children}
         <Scripts />
       </body>
