@@ -2,7 +2,6 @@
 
 <div align="center">
 
-![UNIFY/26 Logo](./public/favicon.png)
 
 **Live demo:** [https://unify26.vercel.app](https://unify26.vercel.app) &nbsp;|&nbsp;
 **Challenge:** Google Prompt Wars — Smart Stadiums & Tournament Operations (Challenge 4)
