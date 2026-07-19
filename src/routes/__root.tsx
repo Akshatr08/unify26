@@ -94,6 +94,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
           "GenAI-powered command console for FIFA World Cup 2026: fan concierge, staff dispatch, and stadium operations intelligence in one unified platform.",
       },
       { name: "author", content: "UNIFY/26" },
+      { name: "theme-color", content: "#E31B23" },
+      { name: "apple-mobile-web-app-capable", content: "yes" },
+      { name: "apple-mobile-web-app-status-bar-style", content: "black-translucent" },
       { property: "og:title", content: "UNIFY/26 — FIFA World Cup 2026 Stadium Operations" },
       {
         property: "og:description",
@@ -115,6 +118,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "canonical", href: "https://unify26.vercel.app/" },
+      { rel: "manifest", href: "/manifest.json" },
+      { rel: "apple-touch-icon", href: "/favicon.png" },
     ],
   }),
   shellComponent: RootShell,

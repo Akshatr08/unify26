@@ -1,13 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AlertTriangle, Leaf, Zap, Droplet } from "lucide-react";
-import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
+import { AlertTriangle, Leaf, Loader2, Zap, Droplet } from "lucide-react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 import { CopilotPanel } from "@/components/CopilotPanel";
+import { MiniStat } from "@/components/MiniStat";
 import { OpsBriefDialog } from "@/components/OpsBriefDialog";
 import { PageHeader } from "@/components/PageHeader";
 import { KpiCard, Bar } from "@/components/KpiCard";
 import { GATE_THROUGHPUT, INCIDENTS, KPIS, VENUE } from "@/data/mock";
+import { sustainabilityAdvisor, type SustainabilityRecommendation } from "@/lib/ai-actions.functions";
 import heatmap from "@/assets/heatmap.jpg";
 
 export const Route = createFileRoute("/command")({
@@ -38,6 +41,23 @@ const SEV_COLOR: Record<string, string> = {
 
 function CommandPage() {
   const [briefKind, setBriefKind] = useState<"report" | "decision" | null>(null);
+  const getSustainabilityAdvice = useServerFn(sustainabilityAdvisor);
+  const [sustainRecs, setSustainRecs] = useState<SustainabilityRecommendation[] | null>(null);
+  const [sustainLoading, setSustainLoading] = useState(false);
+
+  const onSustainAdvise = useCallback(async () => {
+    setSustainLoading(true);
+    try {
+      const recs = await getSustainabilityAdvice({ data: {} });
+      setSustainRecs(recs);
+      toast.success("Sustainability AI analysis complete");
+    } catch {
+      toast.error("Sustainability advisor failed", { description: "Check your API key." });
+    } finally {
+      setSustainLoading(false);
+    }
+  }, [getSustainabilityAdvice]);
+
   return (
     <main className="mx-auto max-w-[1440px] p-6">
       <PageHeader
@@ -107,6 +127,59 @@ function CommandPage() {
           <MiniStat icon={<Zap className="size-4" />} label="Energy Draw" value={`${KPIS.energyDrawMw.value} MW`} delta={KPIS.energyDrawMw.deltaHour} />
           <MiniStat icon={<Droplet className="size-4" />} label="Water Use" value={`${KPIS.waterUseM3.value} m³`} delta={KPIS.waterUseM3.deltaHour} />
           <MiniStat icon={<Leaf className="size-4" />} label="Waste Diverted" value={`${KPIS.wasteDiverted.value}%`} delta={KPIS.wasteDiverted.deltaHour} />
+
+          {/* AI Sustainability Advisor */}
+          <div className="sm:col-span-3 rounded-2xl border border-[color:var(--field)]/30 bg-white p-6 shadow-sm">
+            <div className="mb-4 flex items-center justify-between flex-wrap gap-3">
+              <div>
+                <h3 className="font-display font-bold flex items-center gap-2">
+                  <Leaf className="size-4 text-[color:var(--field)]" aria-hidden="true" />
+                  AI Sustainability Advisor
+                  <span className="ml-1 rounded-full bg-[color:var(--field)]/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-[color:var(--field)]">Gemini 2.0</span>
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">Live KPI analysis → actionable sustainability recommendations</p>
+              </div>
+              <button
+                type="button"
+                onClick={onSustainAdvise}
+                disabled={sustainLoading}
+                aria-label="Run AI sustainability analysis on current KPIs"
+                className="inline-flex items-center gap-2 rounded-lg border border-[color:var(--field)]/40 bg-[color:var(--field)]/5 px-4 py-2 text-sm font-medium text-[color:var(--field)] transition-colors hover:bg-[color:var(--field)]/10 disabled:opacity-40 focus-visible:ring-2 focus-visible:ring-[color:var(--field)]/60"
+              >
+                {sustainLoading ? <Loader2 className="size-4 animate-spin" aria-hidden="true" /> : <Leaf className="size-4" aria-hidden="true" />}
+                {sustainLoading ? "Analysing…" : "Analyse KPIs"}
+              </button>
+            </div>
+            {sustainRecs ? (
+              <ul className="space-y-2" aria-label="Sustainability recommendations">
+                {sustainRecs.map((r, i) => (
+                  <li key={i} className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50 p-3">
+                    <span
+                      className={`mt-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest ${
+                        r.priority === "high"
+                          ? "bg-[color:var(--fifa-red)]/10 text-[color:var(--fifa-red)]"
+                          : r.priority === "medium"
+                          ? "bg-[color:var(--amber-alert)]/10 text-[color:var(--amber-alert)]"
+                          : "bg-[color:var(--field)]/10 text-[color:var(--field)]"
+                      }`}
+                      aria-label={`Priority: ${r.priority}`}
+                    >
+                      {r.priority}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-800">{r.action}</p>
+                      <p className="text-xs text-slate-500 mt-0.5">{r.impact}</p>
+                    </div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 shrink-0">{r.owner}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-slate-400">
+                Click &ldquo;Analyse KPIs&rdquo; to generate AI-powered sustainability recommendations based on live energy, water, and waste data.
+              </p>
+            )}
+          </div>
 
           {/* Heatmap */}
           <div className="sm:col-span-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">

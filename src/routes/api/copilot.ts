@@ -29,9 +29,12 @@ export const Route = createFileRoute("/api/copilot")({
               status: 429,
               headers: {
                 "content-type": "application/json",
+                "cache-control": "no-store",
                 "retry-after": String(rl.retryAfter),
                 "x-ratelimit-limit": String(COPILOT_LIMITS.MAX_REQUESTS_PER_WINDOW),
                 "x-ratelimit-remaining": "0",
+                "x-ratelimit-reset": String(Math.ceil(Date.now() / 1000) + (rl.retryAfter ?? 60)),
+                "x-content-type-options": "nosniff",
               },
             },
           );
@@ -60,9 +63,14 @@ export const Route = createFileRoute("/api/copilot")({
             messages: await convertToModelMessages(check.messages as unknown as UIMessage[]),
             abortSignal: request.signal,
           });
-          return result.toUIMessageStreamResponse({
+          const streamResponse = result.toUIMessageStreamResponse({
             originalMessages: check.messages as unknown as UIMessage[],
           });
+          // Add security + cache headers to the streaming response.
+          streamResponse.headers.set("cache-control", "no-store");
+          streamResponse.headers.set("x-content-type-options", "nosniff");
+          streamResponse.headers.set("x-ratelimit-remaining", String(rl.remaining ?? ""));
+          return streamResponse;
         } catch (err) {
           // Log details server-side; return a generic message to the client.
           console.error("[copilot]", err);

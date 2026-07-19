@@ -1,0 +1,19 @@
+{
+  "name": "UNIFY/26 — Stadium AI Navigator",
+  "short_name": "UNIFY/26",
+  "description": "GenAI-powered FIFA World Cup 2026 stadium operations platform for fans, staff, and ops command.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#E31B23",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "productivity", "utilities"],
+  "lang": "en"
+}

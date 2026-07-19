@@ -1,6 +1,10 @@
-import type { ReactNode } from "react";
+import { memo, type ReactNode } from "react";
 
-export function KpiCard({
+/**
+ * KpiCard — displays a single KPI metric with label, large value, optional
+ * sparkline/child content, and a supporting note.
+ */
+export const KpiCard = memo(function KpiCard({
   label,
   value,
   note,
@@ -19,9 +23,20 @@ export function KpiCard({
       {note && <p className="mt-2 text-xs font-medium text-slate-500">{note}</p>}
     </div>
   );
-}
+});
 
-export function Bar({ pct, color = "red" }: { pct: number; color?: "red" | "green" | "amber" }) {
+/**
+ * Bar — a horizontal percentage-fill progress bar used inside KpiCard.
+ * @param pct   - Fill percentage (0–100). Values above 100 are clamped.
+ * @param color - Semantic color token: "red" (alert), "green" (good), "amber" (warning).
+ */
+export const Bar = memo(function Bar({
+  pct,
+  color = "red",
+}: {
+  pct: number;
+  color?: "red" | "green" | "amber";
+}) {
   const bg =
     color === "green"
       ? "bg-[color:var(--field)]"
@@ -29,8 +44,9 @@ export function Bar({ pct, color = "red" }: { pct: number; color?: "red" | "gree
       ? "bg-[color:var(--amber-alert)]"
       : "bg-[color:var(--fifa-red)]";
   return (
-    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100">
+    <div className="h-1.5 w-full overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow={Math.min(100, pct)} aria-valuemin={0} aria-valuemax={100}>
       <div className={`h-full ${bg} transition-all`} style={{ width: `${Math.min(100, pct)}%` }} />
     </div>
   );
-}
+});
+

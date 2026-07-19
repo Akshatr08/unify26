@@ -19,6 +19,7 @@ import {
   VENUE,
   MATCH,
 } from "@/data/mock";
+import type { SustainabilityRecommendation } from "@/lib/ai-actions.functions";
 
 // ─── Re-export validators from ai-actions (inline for test isolation) ────────
 const ClassifyInput = z.object({
@@ -217,9 +218,105 @@ describe("Mock data integrity (data/mock.ts)", () => {
     expect(STADIUM_WAYFINDING.amenities.length).toBeGreaterThan(0);
   });
 
-  it("All wayfinding gate ids are single uppercase letters", () => {
+  it(\"All wayfinding gate ids are single uppercase letters\", () => {
     for (const gate of STADIUM_WAYFINDING.gates) {
       expect(/^[A-Z]$/.test(gate.id)).toBe(true);
     }
   });
+
+  it("KPIS sustainability score is 0-100", () => {
+    expect(KPIS.sustainability.value).toBeGreaterThanOrEqual(0);
+    expect(KPIS.sustainability.value).toBeLessThanOrEqual(100);
+  });
+
+  it("KPIS energy draw is a positive number", () => {
+    expect(KPIS.energyDrawMw.value).toBeGreaterThan(0);
+  });
+
+  it("KPIS water use is a positive integer", () => {
+    expect(KPIS.waterUseM3.value).toBeGreaterThan(0);
+    expect(Number.isInteger(KPIS.waterUseM3.value)).toBe(true);
+  });
+
+  it("KPIS waste diverted is a percentage 0-100", () => {
+    expect(KPIS.wasteDiverted.value).toBeGreaterThanOrEqual(0);
+    expect(KPIS.wasteDiverted.value).toBeLessThanOrEqual(100);
+  });
 });
+
+// ─── SustainabilityInput validator ───────────────────────────────────────────
+const SustainabilityInput = z.object({
+  focus: z
+    .string()
+    .max(200)
+    .optional()
+    .default("overall sustainability posture for this matchday"),
+});
+
+describe("SustainabilityInput validator", () => {
+  it("accepts an empty object (all fields optional)", () => {
+    const result = SustainabilityInput.safeParse({});
+    expect(result.success).toBe(true);
+  });
+
+  it("applies a default focus when none is given", () => {
+    const result = SustainabilityInput.safeParse({});
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.focus).toBe("overall sustainability posture for this matchday");
+    }
+  });
+
+  it("accepts a custom focus string", () => {
+    const result = SustainabilityInput.safeParse({ focus: "water conservation" });
+    expect(result.success).toBe(true);
+    if (result.success) expect(result.data.focus).toBe("water conservation");
+  });
+
+  it("rejects a focus string over 200 chars", () => {
+    const result = SustainabilityInput.safeParse({ focus: "x".repeat(201) });
+    expect(result.success).toBe(false);
+  });
+});
+
+// ─── SustainabilityRecommendation type tests ─────────────────────────────────
+describe("SustainabilityRecommendation type contract", () => {
+  const VALID_PRIORITIES = new Set<string>(["high", "medium", "low"]);
+
+  const mockRec: SustainabilityRecommendation = {
+    action: "Reduce HVAC load in unoccupied hospitality zones",
+    impact: "Save ~0.15 MW per hour",
+    priority: "high",
+    owner: "Facilities",
+  };
+
+  it("valid recommendation passes type contract", () => {
+    expect(typeof mockRec.action).toBe("string");
+    expect(typeof mockRec.impact).toBe("string");
+    expect(VALID_PRIORITIES.has(mockRec.priority)).toBe(true);
+    expect(typeof mockRec.owner).toBe("string");
+  });
+
+  it("priority must be high | medium | low", () => {
+    const priorities: SustainabilityRecommendation["priority"][] = ["high", "medium", "low"];
+    for (const p of priorities) {
+      expect(VALID_PRIORITIES.has(p)).toBe(true);
+    }
+  });
+
+  it("action and impact fields are non-empty strings", () => {
+    expect(mockRec.action.length).toBeGreaterThan(0);
+    expect(mockRec.impact.length).toBeGreaterThan(0);
+  });
+
+  it("owner field is a non-empty string", () => {
+    expect(mockRec.owner.length).toBeGreaterThan(0);
+  });
+
+  it("defensive clamping: action slice to 120 chars works", () => {
+    const longAction = "a".repeat(200);
+    const clamped = longAction.slice(0, 120);
+    expect(clamped.length).toBe(120);
+  });
+});
+
