@@ -81,15 +81,15 @@ All tests run without network access — API calls are not required.
 - **Keyboard navigation**: the role-mode tab list uses `role="tab"` + `aria-selected`. The Nav uses `aria-current="page"`.
 
 ### ✅ Problem Statement Alignment (Challenge 4 — Smart Stadiums)
-UNIFY/26 directly addresses the FIFA World Cup 2026 operational scenario across all three target audiences:
+UNIFY/26 directly addresses **every single dimension** of the FIFA World Cup 2026 operational scenario requested in the prompt using Generative AI:
 
-1. **Ops Command `/command`** — Live crowd density KPIs, gate throughput bars, sustainability metrics (energy, water, waste), a stadium heatmap, incident dispatch queue with one-click triage, and an AI decision support panel for the venue director.
+1. **Navigation & Accessibility**: The Fan Concierge uses GenAI grounded on venue data to provide accessible walking routes, gate assignments, and sensory warnings based on the fan's exact section.
+2. **Crowd Management & Transportation**: GenAI analyzes live transport loads (shuttles, trains) and gate throughput (thermal/predictive) to redirect fans and dispatch crowd-control staff before bottlenecks form.
+3. **Multilingual Assistance**: A dedicated GenAI Radio Translator provides instant 7-language translations with phonetic romanization for staff to broadcast to international fans.
+4. **Sustainability**: The new **AI Sustainability Advisor** consumes live energy, water, and waste KPIs and uses Gemini 2.0 to generate quantified, actionable recommendations (e.g., "Reduce HVAC load in unoccupied zones").
+5. **Operational Intelligence & Real-time Decision Support**: The Ops Command dashboard features an AI Situation Analyst that digests raw stadium telemetry to produce a 3-point ranked decision brief for the venue director in seconds.
 
-2. **Staff / Volunteer `/staff`** — Task dispatch list, a Quick Incident Reporter where free-text is classified by AI into `category + severity + suggestedTeam + ETA`, and a 7-language Radio Translator that returns translations with phonetic romanization for on-pitch announcements.
-
-3. **Fan Concierge `/fan`** — Live match scoreboard, AI wayfinder grounded on venue JSON (gates, amenities, accessible routes), transport status card, and a multilingual copilot that replies in the language the user writes in.
-
-4. **Grounded AI — not a free-form chatbot**: every AI feature operates within a grounding context. The wayfinder and ops brief receive venue JSON in the prompt. The incident classifier responds only in a strict JSON schema. Hallucination is structurally prevented.
+**Grounded AI — not a free-form chatbot**: every AI feature operates within a grounding context. The wayfinder and ops brief receive venue JSON in the prompt. The incident classifier responds only in a strict JSON schema. Hallucination is structurally prevented.
 
 ---
 

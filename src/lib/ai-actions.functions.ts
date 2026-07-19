@@ -66,7 +66,7 @@ const CATEGORY_WHITELIST = new Set([
  * Falls back to safe defaults if the model returns unparseable output.
  */
 export const classifyIncident = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => ClassifyInput.parse(input))
+  .validator((input: unknown) => ClassifyInput.parse(input))
   .handler(async ({ data }) => {
     const { getGeminiModel } = await import("./ai.server");
     const model = getGeminiModel();
@@ -117,7 +117,7 @@ No prose, no markdown fences.`,
  * Returns the translation, optional romanization (for non-Latin scripts), and a usage note.
  */
 export const translateMessage = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => TranslateInput.parse(input))
+  .validator((input: unknown) => TranslateInput.parse(input))
   .handler(async ({ data }) => {
     const { getGeminiModel } = await import("./ai.server");
     const model = getGeminiModel();
@@ -155,7 +155,7 @@ Text: """${data.text}"""`,
  * Replies in the language the user writes in.
  */
 export const wayfindingAnswer = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => WayfindingInput.parse(input))
+  .validator((input: unknown) => WayfindingInput.parse(input))
   .handler(async ({ data }) => {
     const { getGeminiModel } = await import("./ai.server");
     const { STADIUM_WAYFINDING } = await import("@/data/mock");
@@ -184,7 +184,7 @@ Question: """${data.question}"""`,
  * Grounded on live KPI, incident, gate, and transport data.
  */
 export const generateOpsBrief = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => OpsBriefInput.parse(input))
+  .validator((input: unknown) => OpsBriefInput.parse(input))
   .handler(async ({ data }) => {
     const { getGeminiModel } = await import("./ai.server");
     const { KPIS, GATE_THROUGHPUT, INCIDENTS, TRANSPORT, VENUE } = await import("@/data/mock");
@@ -239,7 +239,7 @@ Focus (optional): ${data.focus ?? "overall matchday posture"}`,
  *          Falls back to a safe static recommendation if the model fails.
  */
 export const sustainabilityAdvisor = createServerFn({ method: "POST" })
-  .inputValidator((input: unknown) => SustainabilityInput.parse(input))
+  .validator((input: unknown) => SustainabilityInput.parse(input))
   .handler(async ({ data }) => {
     const { getGeminiModel } = await import("./ai.server");
     const { KPIS, VENUE } = await import("@/data/mock");
